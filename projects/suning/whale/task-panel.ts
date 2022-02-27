@@ -15,25 +15,25 @@ function openTaskPanel(): void {
     return;
   }
 
-  const parent = textContains('每天9点开启').findOnce()?.parent().parent();
+  const parent = textContains('每天9点开启')?.findOnce()?.parent()?.parent();
 
-  collection2array(parent?.children())[7]?.click();
+  // collection2array(parent?.children())[7]?.click();
 
   sleep(1000);
   throwIfNotInTask();
 }
 
 function closeTaskPanel(): void {
-  if (checkIsInTaskPanel()) {
-    textContains('去完成')
-      .findOnce()
-      ?.parent()
-      .parent()
-      .parent()
-      .children()
-      .get(0)
-      .click();
-  }
+  // if (checkIsInTaskPanel()) {
+  //   textContains('去完成')
+  //     ?.findOnce()
+  //     ?.parent()
+  //     ?.parent()
+  //     ?.parent()
+  //     .children()
+  //     .get(0)
+  //     .click();
+  // }
 }
 
 function reopenTaskPanel(): void {

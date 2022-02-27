@@ -17,5 +17,6 @@ declare function Down(): void;
 declare function Left(): void;
 declare function Right(): void;
 declare function OK(): void;
+// @ts-ignore
 declare function Text(text: string): void;
 declare function KeyCode(code: number | string): void;

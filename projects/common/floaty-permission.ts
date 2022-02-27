@@ -1,6 +1,7 @@
 importClass(android.net.Uri);
 importClass(android.provider.Settings);
 
+// 检查是否有悬浮窗权限
 function checkFloaty(): boolean {
   try {
     return Settings.canDrawOverlays(context);

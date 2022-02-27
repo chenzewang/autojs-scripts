@@ -6,6 +6,7 @@ function close() {
 }
 
 function doExclusive(): void {
+  // @ts-ignore
   const obj = textContains('每天9点开启')
     .findOnce()
     ?.parent()

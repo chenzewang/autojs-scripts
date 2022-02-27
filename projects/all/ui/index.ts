@@ -9,13 +9,29 @@ import layout from './layout.xml';
 
 layout();
 
+/**
+ * View的状态
+ */
 enum Status {
   visible = 0,
   invisible = 8,
 }
 
-const status: { [key: string]: boolean } = {};
+/**
+ * 权限的状态
+ */
+const PermissionStatus: {
+  // 无状态服务是否打开
+  accessibility: boolean;
+  // 悬浮窗权限是否打开
+  floaty: boolean;
+  [key: string]: boolean;
+} = {
+  floaty: false,
+  accessibility: false,
+};
 
+// 第三方脚本的链接
 const thirdPartyScripts = [
   {
     key: 'czj2369_tb',
@@ -38,6 +54,10 @@ const btns = [
   },
 ];
 
+/**
+ *
+ * 渲染 与获取无障碍权限相关的按钮
+ */
 function renderAccessibility(type: boolean) {
   if (type) {
     ui.accessibilityStatusCheck.visibility = Status.invisible;
@@ -50,6 +70,9 @@ function renderAccessibility(type: boolean) {
   }
 }
 
+/**
+ * 渲染 与获取悬浮窗权限相关的按钮
+ */
 function renderFloaty(type: boolean | 'hidden') {
   if (type === 'hidden') {
     ui.floatyBtn.visibility = Status.invisible;
@@ -67,9 +90,13 @@ function renderFloaty(type: boolean | 'hidden') {
   }
 }
 
+/**
+ * 渲染第三方脚本的按钮
+ */
 function renderThirdParty() {
   const statusList: { key: string; success?: boolean; failed?: boolean }[] = [];
 
+  // 每秒检查所有外部脚本，直到所有脚本都已经下载到本地
   const interval = setInterval(() => {
     if (!thirdPartyScripts.length) {
       clearInterval(interval);
@@ -124,17 +151,17 @@ function renderThirdParty() {
 }
 
 function render() {
-  if (!status.accessibility) {
+  if (!PermissionStatus.accessibility) {
     renderAccessibility(false);
     renderFloaty('hidden');
   } else {
     renderAccessibility(true);
-    renderFloaty(status.floaty);
+    renderFloaty(PermissionStatus.floaty);
 
     renderThirdParty();
   }
 
-  if (status.accessibility && status.floaty) {
+  if (PermissionStatus.accessibility && PermissionStatus.floaty) {
     btns.forEach(({ id }) => {
       ui[id].visibility = Status.visible;
     });
@@ -146,8 +173,8 @@ function render() {
 }
 
 async function checkStatus() {
-  status.accessibility = !!auto.service;
-  status.floaty = checkFloaty();
+  PermissionStatus.accessibility = !!auto.service;
+  PermissionStatus.floaty = checkFloaty();
 
   render();
 }
@@ -188,32 +215,37 @@ events.on('exit', () => {
   threads.shutDownAll();
 });
 
+// 去获取无障碍权限
 ui.accessibilityBtn.click(async () => {
   await checkStatus();
 
-  if (!status.accessibility) {
+  if (!PermissionStatus.accessibility) {
     app.startActivity({
       action: 'android.settings.ACCESSIBILITY_SETTINGS',
     });
   }
 });
 
+// 去获取悬浮窗权限
 ui.floatyBtn.click(async () => {
   await checkStatus();
 
-  if (!status.floaty) {
+  if (!PermissionStatus.floaty) {
     openFloatySetting();
   }
 });
 
+// 回到ui时
 ui.emitter.on('resume', () => {
   checkStatus();
 });
 
+// 离开ui时
 ui.emitter.on('exit', () => {
   threads.shutDownAll();
 });
 
+// 给任务按钮绑定事件
 btns.forEach(({ id, type }) => {
   ui[id].click(() => {
     run(type);
